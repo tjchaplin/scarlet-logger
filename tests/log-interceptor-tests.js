@@ -1,5 +1,5 @@
 var should = require('should');
-var LogInterceptor = require("../lib/logInterceptor.js");
+var LogInterceptor = require("../lib/log-interceptor.js");
 
 function interceptorContext(){
 	var self = this;
