@@ -10,17 +10,31 @@ function interceptorContext(){
 	self.errorHasBeenCalled = false;
 
 	self.logInterceptor = new LogInterceptor();
-	self.logInterceptor.method = function(){self.methodHasBeenCalled = true;};
+	var invocation = {method:function(){self.methodHasBeenCalled = true;},
+						parameters:[],
+						proceed:function(){}
+					};
+
+	self.invoke = function(methodToCall,parameters){
+		if(!parameters)
+			parameters = [];
+
+		invocation.proceed = function(){return methodToCall.apply(self,parameters);};
+		invocation.parameters = parameters;
+		return self.logInterceptor.intercept(invocation);
+	};
+
 	self.logInterceptor.debug = function(message){self.debugHasBeenCalled = true; self.logMessage = message;};
 	self.logInterceptor.error = function(error){self.errorHasBeenCalled = true; self.error = error;};
 
 	return self;
-};
+}
 
 describe('Given using a log interceptor',function(){
 	describe('When has a method to log',function(){
 		var context = new interceptorContext();
-		function function1(){};
+		function function1(){}
+
 		function1.prototype.add1 = function(value){
 			if(!value)
 				value = 1;
@@ -29,14 +43,16 @@ describe('Given using a log interceptor',function(){
 
 		it("should call debug log",function(onComplete){
 			var objectToLog = new function1();	
-			context.logInterceptor.functionInvocation(objectToLog.add1);
+
+			context.invoke(objectToLog.add1);
 			context.debugHasBeenCalled.should.be.eql(true);
 			onComplete();
 		});
 	});
+
 	describe('When has a method to log with parameters',function(){
 		var context = new interceptorContext();
-		function function1(){};
+		function function1(){}
 		function1.prototype.add1 = function(value){
 			if(!value)
 				value = 1;
@@ -46,18 +62,18 @@ describe('Given using a log interceptor',function(){
 
 		it("should call debug log",function(onComplete){
 			var objectToLog = new function1();	
-			var result = context.logInterceptor.functionInvocation(objectToLog.add1,2);
+			var result = context.invoke(objectToLog.add1,[2]);
 			result.should.be.eql(3);
 			onComplete();
 		});
 	});
 	describe('When method to log throws an exception',function(){
 		var context = new interceptorContext();
-		var errorFunction = function(){throw new Error("Something bad happened.") };
+		var errorFunction = function(){throw new Error("Something bad happened."); };
 		var didThrowError = false;
 		var thrownException;
 		try{
-			context.logInterceptor.functionInvocation(errorFunction);
+			context.invoke(errorFunction);
 		}catch(exception){
 			didThrowError = true;
 			thrownException = exception;
