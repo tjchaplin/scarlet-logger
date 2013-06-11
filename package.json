@@ -1,7 +1,7 @@
 {
   "name": "scarlet-logger",
   "description": "A Javascript interceptor logger that easily intercepts and logs all method calls",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
     "type": "git",
